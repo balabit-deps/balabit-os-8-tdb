@@ -1,3 +1,10 @@
+tdb (1.4.3-0ubuntu0.20.04.1) focal-security; urgency=medium
+
+  * Updated to upstream 1.4.3 as required by Samba security update.
+    - debian/libtdb1.symbols: updated for new version.
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Mon, 01 Nov 2021 14:10:14 -0400
+
 tdb (1.4.2-3build1) focal; urgency=medium
 
   * No-change rebuild to build with python3.8.
