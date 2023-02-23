@@ -33,7 +33,7 @@ diff -ur tdb-1.2.9/include/tdb.h tdb-1.2.9+git20120207.new/include/tdb.h
 +++ tdb-1.2.9+git20120207.new/include/tdb.h	2012-02-07 15:24:06.000000000 +0100
 @@ -233,6 +233,9 @@
   */
- int tdb_reopen_all(int parent_longlived);
+ _PUBLIC_ int tdb_reopen_all(int parent_longlived);
  
 +
 +__attribute__((deprecated)) void tdb_logging_function(struct tdb_context *tdb, tdb_log_func);

@@ -33,6 +33,19 @@ extern "C" {
 #include <signal.h>
 #include <stdbool.h>
 
+/* for old gcc releases that don't have the feature test macro __has_attribute */
+#ifndef __has_attribute
+#define __has_attribute(x) 0
+#endif
+
+#ifndef _PUBLIC_
+#if __has_attribute(visibility)
+#define _PUBLIC_ __attribute__((visibility("default")))
+#else
+#define _PUBLIC_
+#endif
+#endif
+
 /**
  * @defgroup tdb The tdb API
  *
@@ -102,7 +115,7 @@ typedef struct TDB_DATA {
 } TDB_DATA;
 
 #ifndef PRINTF_ATTRIBUTE
-#if (__GNUC__ >= 3)
+#if __has_attribute(format) || (__GNUC__ >= 3)
 /** Use gcc attribute to check printf fns.  a1 is the 1-based index of
  * the parameter containing the format, and a2 the index of the first
  * argument. Note that some gcc 2.x versions don't handle this
@@ -159,7 +172,7 @@ struct tdb_logging_context {
  *
  * @return              A tdb context structure, NULL on error.
  */
-struct tdb_context *tdb_open(const char *name, int hash_size, int tdb_flags,
+_PUBLIC_ struct tdb_context *tdb_open(const char *name, int hash_size, int tdb_flags,
 		      int open_flags, mode_t mode);
 
 /**
@@ -206,7 +219,7 @@ struct tdb_context *tdb_open(const char *name, int hash_size, int tdb_flags,
  *
  * @see tdb_open()
  */
-struct tdb_context *tdb_open_ex(const char *name, int hash_size, int tdb_flags,
+_PUBLIC_ struct tdb_context *tdb_open_ex(const char *name, int hash_size, int tdb_flags,
 			 int open_flags, mode_t mode,
 			 const struct tdb_logging_context *log_ctx,
 			 tdb_hash_func hash_fn);
@@ -218,7 +231,7 @@ struct tdb_context *tdb_open_ex(const char *name, int hash_size, int tdb_flags,
  *
  * @param[in]  max_dead The maximum number of dead records per hash chain.
  */
-void tdb_set_max_dead(struct tdb_context *tdb, int max_dead);
+_PUBLIC_ void tdb_set_max_dead(struct tdb_context *tdb, int max_dead);
 
 /**
  * @brief Reopen a tdb.
@@ -233,7 +246,7 @@ void tdb_set_max_dead(struct tdb_context *tdb, int max_dead);
  * @note Don't call tdb_error() after this function cause the tdb context will
  *       be freed on error.
  */
-int tdb_reopen(struct tdb_context *tdb);
+_PUBLIC_ int tdb_reopen(struct tdb_context *tdb);
 
 /**
  * @brief Reopen all tdb's
@@ -248,7 +261,7 @@ int tdb_reopen(struct tdb_context *tdb);
  *
  * @return              0 on success, -1 on error.
  */
-int tdb_reopen_all(int parent_longlived);
+_PUBLIC_ int tdb_reopen_all(int parent_longlived);
 
 /**
  * @brief Set a different tdb logging function.
@@ -257,7 +270,7 @@ int tdb_reopen_all(int parent_longlived);
  *
  * @param[in]  log_ctx  The logging function to set.
  */
-void tdb_set_logging_function(struct tdb_context *tdb, const struct tdb_logging_context *log_ctx);
+_PUBLIC_ void tdb_set_logging_function(struct tdb_context *tdb, const struct tdb_logging_context *log_ctx);
 
 /**
  * @brief Get the tdb last error code.
@@ -268,7 +281,7 @@ void tdb_set_logging_function(struct tdb_context *tdb, const struct tdb_logging_
  *
  * @see TDB_ERROR
  */
-enum TDB_ERROR tdb_error(struct tdb_context *tdb);
+_PUBLIC_ enum TDB_ERROR tdb_error(struct tdb_context *tdb);
 
 /**
  * @brief Get a error string for the last tdb error
@@ -277,7 +290,7 @@ enum TDB_ERROR tdb_error(struct tdb_context *tdb);
  *
  * @return              An error string.
  */
-const char *tdb_errorstr(struct tdb_context *tdb);
+_PUBLIC_ const char *tdb_errorstr(struct tdb_context *tdb);
 
 /**
  * @brief Fetch an entry in the database given a key.
@@ -294,7 +307,7 @@ const char *tdb_errorstr(struct tdb_context *tdb);
  * @see tdb_error()
  * @see tdb_errorstr()
  */
-TDB_DATA tdb_fetch(struct tdb_context *tdb, TDB_DATA key);
+_PUBLIC_ TDB_DATA tdb_fetch(struct tdb_context *tdb, TDB_DATA key);
 
 /**
  * @brief Hand a record to a parser function without allocating it.
@@ -319,7 +332,7 @@ TDB_DATA tdb_fetch(struct tdb_context *tdb, TDB_DATA key);
  * @return              -1 if the record was not found. If the record was found,
  *                      the return value of "parser" is passed up to the caller.
  */
-int tdb_parse_record(struct tdb_context *tdb, TDB_DATA key,
+_PUBLIC_ int tdb_parse_record(struct tdb_context *tdb, TDB_DATA key,
 			      int (*parser)(TDB_DATA key, TDB_DATA data,
 					    void *private_data),
 			      void *private_data);
@@ -333,7 +346,7 @@ int tdb_parse_record(struct tdb_context *tdb, TDB_DATA key,
  *
  * @return              0 on success, -1 if the key doesn't exist.
  */
-int tdb_delete(struct tdb_context *tdb, TDB_DATA key);
+_PUBLIC_ int tdb_delete(struct tdb_context *tdb, TDB_DATA key);
 
 /**
  * @brief Store an element in the database.
@@ -355,7 +368,7 @@ int tdb_delete(struct tdb_context *tdb, TDB_DATA key);
  * @see tdb_error()
  * @see tdb_errorstr()
  */
-int tdb_store(struct tdb_context *tdb, TDB_DATA key, TDB_DATA dbuf, int flag);
+_PUBLIC_ int tdb_store(struct tdb_context *tdb, TDB_DATA key, TDB_DATA dbuf, int flag);
 
 
 /**
@@ -380,7 +393,7 @@ int tdb_store(struct tdb_context *tdb, TDB_DATA key, TDB_DATA dbuf, int flag);
  * @see tdb_error()
  * @see tdb_errorstr()
  */
-int tdb_storev(struct tdb_context *tdb, TDB_DATA key,
+_PUBLIC_ int tdb_storev(struct tdb_context *tdb, TDB_DATA key,
 	       const TDB_DATA *dbufs, int num_dbufs, int flag);
 
 /**
@@ -399,7 +412,7 @@ int tdb_storev(struct tdb_context *tdb, TDB_DATA key,
  * @see tdb_error()
  * @see tdb_errorstr()
  */
-int tdb_append(struct tdb_context *tdb, TDB_DATA key, TDB_DATA new_dbuf);
+_PUBLIC_ int tdb_append(struct tdb_context *tdb, TDB_DATA key, TDB_DATA new_dbuf);
 
 /**
  * @brief Close a database.
@@ -411,7 +424,7 @@ int tdb_append(struct tdb_context *tdb, TDB_DATA key, TDB_DATA new_dbuf);
  * @note Don't call tdb_error() after this function cause the tdb context will
  *       be freed on error.
  */
-int tdb_close(struct tdb_context *tdb);
+_PUBLIC_ int tdb_close(struct tdb_context *tdb);
 
 /**
  * @brief Find the first entry in the database and return its key.
@@ -423,7 +436,7 @@ int tdb_close(struct tdb_context *tdb);
  * @return              The first entry of the database, an empty TDB_DATA entry
  *                      if the database is empty.
  */
-TDB_DATA tdb_firstkey(struct tdb_context *tdb);
+_PUBLIC_ TDB_DATA tdb_firstkey(struct tdb_context *tdb);
 
 /**
  * @brief Find the next entry in the database, returning its key.
@@ -437,7 +450,7 @@ TDB_DATA tdb_firstkey(struct tdb_context *tdb);
  * @return              The next entry of the current key, an empty TDB_DATA
  *                      entry if there is no entry.
  */
-TDB_DATA tdb_nextkey(struct tdb_context *tdb, TDB_DATA key);
+_PUBLIC_ TDB_DATA tdb_nextkey(struct tdb_context *tdb, TDB_DATA key);
 
 /**
  * @brief Traverse the entire database.
@@ -459,7 +472,7 @@ TDB_DATA tdb_nextkey(struct tdb_context *tdb, TDB_DATA key);
  *
  * @return              The record count traversed, -1 on error.
  */
-int tdb_traverse(struct tdb_context *tdb, tdb_traverse_func fn, void *private_data);
+_PUBLIC_ int tdb_traverse(struct tdb_context *tdb, tdb_traverse_func fn, void *private_data);
 
 /**
  * @brief Traverse the entire database.
@@ -478,7 +491,7 @@ int tdb_traverse(struct tdb_context *tdb, tdb_traverse_func fn, void *private_da
  *
  * @return              The record count traversed, -1 on error.
  */
-int tdb_traverse_read(struct tdb_context *tdb, tdb_traverse_func fn, void *private_data);
+_PUBLIC_ int tdb_traverse_read(struct tdb_context *tdb, tdb_traverse_func fn, void *private_data);
 
 /**
  * @brief Traverse a single hash chain
@@ -511,7 +524,7 @@ int tdb_traverse_read(struct tdb_context *tdb, tdb_traverse_func fn, void *priva
  * @return              The record count traversed, -1 on error.
  */
 
-int tdb_traverse_chain(struct tdb_context *tdb,
+_PUBLIC_ int tdb_traverse_chain(struct tdb_context *tdb,
 		       unsigned chain,
 		       tdb_traverse_func fn,
 		       void *private_data);
@@ -543,7 +556,7 @@ int tdb_traverse_chain(struct tdb_context *tdb,
  * @return              The record count traversed, -1 on error.
  */
 
-int tdb_traverse_key_chain(struct tdb_context *tdb,
+_PUBLIC_ int tdb_traverse_key_chain(struct tdb_context *tdb,
 			   TDB_DATA key,
 			   tdb_traverse_func fn,
 			   void *private_data);
@@ -560,7 +573,7 @@ int tdb_traverse_key_chain(struct tdb_context *tdb,
  *
  * @return              1 if the key is found, 0 if not.
  */
-int tdb_exists(struct tdb_context *tdb, TDB_DATA key);
+_PUBLIC_ int tdb_exists(struct tdb_context *tdb, TDB_DATA key);
 
 /**
  * @brief Lock entire database with a write lock.
@@ -572,7 +585,7 @@ int tdb_exists(struct tdb_context *tdb, TDB_DATA key);
  * @see tdb_error()
  * @see tdb_errorstr()
  */
-int tdb_lockall(struct tdb_context *tdb);
+_PUBLIC_ int tdb_lockall(struct tdb_context *tdb);
 
 /**
  * @brief Lock entire database with a write lock.
@@ -587,7 +600,7 @@ int tdb_lockall(struct tdb_context *tdb);
  * @see tdb_error()
  * @see tdb_errorstr()
  */
-int tdb_lockall_nonblock(struct tdb_context *tdb);
+_PUBLIC_ int tdb_lockall_nonblock(struct tdb_context *tdb);
 
 /**
  * @brief Unlock entire database with write lock.
@@ -600,7 +613,7 @@ int tdb_lockall_nonblock(struct tdb_context *tdb);
  * @see tdb_error()
  * @see tdb_errorstr()
  */
-int tdb_unlockall(struct tdb_context *tdb);
+_PUBLIC_ int tdb_unlockall(struct tdb_context *tdb);
 
 /**
  * @brief Lock entire database with a read lock.
@@ -612,7 +625,7 @@ int tdb_unlockall(struct tdb_context *tdb);
  * @see tdb_error()
  * @see tdb_errorstr()
  */
-int tdb_lockall_read(struct tdb_context *tdb);
+_PUBLIC_ int tdb_lockall_read(struct tdb_context *tdb);
 
 /**
  * @brief Lock entire database with a read lock.
@@ -627,7 +640,7 @@ int tdb_lockall_read(struct tdb_context *tdb);
  * @see tdb_error()
  * @see tdb_errorstr()
  */
-int tdb_lockall_read_nonblock(struct tdb_context *tdb);
+_PUBLIC_ int tdb_lockall_read_nonblock(struct tdb_context *tdb);
 
 /**
  * @brief Unlock entire database with read lock.
@@ -640,7 +653,7 @@ int tdb_lockall_read_nonblock(struct tdb_context *tdb);
  * @see tdb_error()
  * @see tdb_errorstr()
  */
-int tdb_unlockall_read(struct tdb_context *tdb);
+_PUBLIC_ int tdb_unlockall_read(struct tdb_context *tdb);
 
 /**
  * @brief Lock entire database with write lock - mark only.
@@ -654,7 +667,7 @@ int tdb_unlockall_read(struct tdb_context *tdb);
  * @see tdb_error()
  * @see tdb_errorstr()
  */
-int tdb_lockall_mark(struct tdb_context *tdb);
+_PUBLIC_ int tdb_lockall_mark(struct tdb_context *tdb);
 
 /**
  * @brief Lock entire database with write lock - unmark only.
@@ -668,7 +681,7 @@ int tdb_lockall_mark(struct tdb_context *tdb);
  * @see tdb_error()
  * @see tdb_errorstr()
  */
-int tdb_lockall_unmark(struct tdb_context *tdb);
+_PUBLIC_ int tdb_lockall_unmark(struct tdb_context *tdb);
 
 /**
  * @brief Get the name of the current tdb file.
@@ -679,7 +692,7 @@ int tdb_lockall_unmark(struct tdb_context *tdb);
  *
  * @return              The name of the database.
  */
-const char *tdb_name(struct tdb_context *tdb);
+_PUBLIC_ const char *tdb_name(struct tdb_context *tdb);
 
 /**
  * @brief Get the underlying file descriptor being used by tdb.
@@ -691,7 +704,7 @@ const char *tdb_name(struct tdb_context *tdb);
  *
  * @return              The file descriptor or -1.
  */
-int tdb_fd(struct tdb_context *tdb);
+_PUBLIC_ int tdb_fd(struct tdb_context *tdb);
 
 /**
  * @brief Get the current logging function.
@@ -704,7 +717,7 @@ int tdb_fd(struct tdb_context *tdb);
  *
  * @see tdb_get_logging_private()
  */
-tdb_log_func tdb_log_fn(struct tdb_context *tdb);
+_PUBLIC_ tdb_log_func tdb_log_fn(struct tdb_context *tdb);
 
 /**
  * @brief Get the private data of the logging function.
@@ -715,7 +728,7 @@ tdb_log_func tdb_log_fn(struct tdb_context *tdb);
  *
  * @see tdb_log_fn()
  */
-void *tdb_get_logging_private(struct tdb_context *tdb);
+_PUBLIC_ void *tdb_get_logging_private(struct tdb_context *tdb);
 
 /**
  * @brief Is a transaction active?
@@ -733,7 +746,7 @@ void *tdb_get_logging_private(struct tdb_context *tdb);
  * @see tdb_transaction_commit()
  * @see tdb_transaction_cancel()
  */
-bool tdb_transaction_active(struct tdb_context *tdb);
+_PUBLIC_ bool tdb_transaction_active(struct tdb_context *tdb);
 
 /**
  * @brief Start a transaction.
@@ -766,7 +779,7 @@ bool tdb_transaction_active(struct tdb_context *tdb);
  * @see tdb_error()
  * @see tdb_errorstr()
  */
-int tdb_transaction_start(struct tdb_context *tdb);
+_PUBLIC_ int tdb_transaction_start(struct tdb_context *tdb);
 
 /**
  * @brief Start a transaction, non-blocking.
@@ -779,7 +792,7 @@ int tdb_transaction_start(struct tdb_context *tdb);
  * @see tdb_errorstr()
  * @see tdb_transaction_start()
  */
-int tdb_transaction_start_nonblock(struct tdb_context *tdb);
+_PUBLIC_ int tdb_transaction_start_nonblock(struct tdb_context *tdb);
 
 /**
  * @brief Prepare to commit a current transaction, for two-phase commits.
@@ -796,7 +809,7 @@ int tdb_transaction_start_nonblock(struct tdb_context *tdb);
  * @see tdb_error()
  * @see tdb_errorstr()
  */
-int tdb_transaction_prepare_commit(struct tdb_context *tdb);
+_PUBLIC_ int tdb_transaction_prepare_commit(struct tdb_context *tdb);
 
 /**
  * @brief Commit a current transaction.
@@ -810,7 +823,7 @@ int tdb_transaction_prepare_commit(struct tdb_context *tdb);
  * @see tdb_error()
  * @see tdb_errorstr()
  */
-int tdb_transaction_commit(struct tdb_context *tdb);
+_PUBLIC_ int tdb_transaction_commit(struct tdb_context *tdb);
 
 /**
  * @brief Cancel a current transaction.
@@ -825,7 +838,7 @@ int tdb_transaction_commit(struct tdb_context *tdb);
  * @see tdb_error()
  * @see tdb_errorstr()
  */
-int tdb_transaction_cancel(struct tdb_context *tdb);
+_PUBLIC_ int tdb_transaction_cancel(struct tdb_context *tdb);
 
 /**
  * @brief Get the tdb sequence number.
@@ -845,7 +858,7 @@ int tdb_transaction_cancel(struct tdb_context *tdb);
  * @see tdb_open()
  * @see tdb_enable_seqnum()
  */
-int tdb_get_seqnum(struct tdb_context *tdb);
+_PUBLIC_ int tdb_get_seqnum(struct tdb_context *tdb);
 
 /**
  * @brief Get the hash size.
@@ -854,7 +867,7 @@ int tdb_get_seqnum(struct tdb_context *tdb);
  *
  * @return              The hash size.
  */
-int tdb_hash_size(struct tdb_context *tdb);
+_PUBLIC_ int tdb_hash_size(struct tdb_context *tdb);
 
 /**
  * @brief Get the map size.
@@ -863,7 +876,7 @@ int tdb_hash_size(struct tdb_context *tdb);
  *
  * @return             The map size.
  */
-size_t tdb_map_size(struct tdb_context *tdb);
+_PUBLIC_ size_t tdb_map_size(struct tdb_context *tdb);
 
 /**
  * @brief Get the tdb flags set during open.
@@ -872,7 +885,7 @@ size_t tdb_map_size(struct tdb_context *tdb);
  *
  * @return              The flags set to on the database.
  */
-int tdb_get_flags(struct tdb_context *tdb);
+_PUBLIC_ int tdb_get_flags(struct tdb_context *tdb);
 
 /**
  * @brief Add flags to the database.
@@ -881,7 +894,7 @@ int tdb_get_flags(struct tdb_context *tdb);
  *
  * @param[in]  flag     The tdb flags to add.
  */
-void tdb_add_flags(struct tdb_context *tdb, unsigned flag);
+_PUBLIC_ void tdb_add_flags(struct tdb_context *tdb, unsigned flag);
 
 /**
  * @brief Remove flags from the database.
@@ -890,7 +903,7 @@ void tdb_add_flags(struct tdb_context *tdb, unsigned flag);
  *
  * @param[in]  flag     The tdb flags to remove.
  */
-void tdb_remove_flags(struct tdb_context *tdb, unsigned flag);
+_PUBLIC_ void tdb_remove_flags(struct tdb_context *tdb, unsigned flag);
 
 /**
  * @brief Enable sequence number handling on an open tdb.
@@ -899,7 +912,7 @@ void tdb_remove_flags(struct tdb_context *tdb, unsigned flag);
  *
  * @see tdb_get_seqnum()
  */
-void tdb_enable_seqnum(struct tdb_context *tdb);
+_PUBLIC_ void tdb_enable_seqnum(struct tdb_context *tdb);
 
 /**
  * @brief Increment the tdb sequence number.
@@ -912,7 +925,7 @@ void tdb_enable_seqnum(struct tdb_context *tdb);
  * @see tdb_enable_seqnum()
  * @see tdb_get_seqnum()
  */
-void tdb_increment_seqnum_nonblock(struct tdb_context *tdb);
+_PUBLIC_ void tdb_increment_seqnum_nonblock(struct tdb_context *tdb);
 
 /**
  * @brief Create a hash of the key.
@@ -921,7 +934,7 @@ void tdb_increment_seqnum_nonblock(struct tdb_context *tdb);
  *
  * @return              The hash.
  */
-unsigned int tdb_jenkins_hash(TDB_DATA *key);
+_PUBLIC_ unsigned int tdb_jenkins_hash(TDB_DATA *key);
 
 /**
  * @brief Check the consistency of the database.
@@ -944,7 +957,7 @@ unsigned int tdb_jenkins_hash(TDB_DATA *key);
  * @see tdb_error()
  * @see tdb_errorstr()
  */
-int tdb_check(struct tdb_context *tdb,
+_PUBLIC_ int tdb_check(struct tdb_context *tdb,
 	      int (*check) (TDB_DATA key, TDB_DATA data, void *private_data),
 	      void *private_data);
 
@@ -966,7 +979,7 @@ int tdb_check(struct tdb_context *tdb,
  * @see tdb_error()
  * @see tdb_errorstr()
  */
-int tdb_rescue(struct tdb_context *tdb,
+_PUBLIC_ int tdb_rescue(struct tdb_context *tdb,
 	       void (*walk) (TDB_DATA key, TDB_DATA data, void *private_data),
 	       void *private_data);
 
@@ -989,34 +1002,34 @@ int tdb_rescue(struct tdb_context *tdb,
  *
  * @see TDB_MUTEX_LOCKING
  */
-bool tdb_runtime_check_for_robust_mutexes(void);
+_PUBLIC_ bool tdb_runtime_check_for_robust_mutexes(void);
 
 /* @} ******************************************************************/
 
 /* Low level locking functions: use with care */
-int tdb_chainlock(struct tdb_context *tdb, TDB_DATA key);
-int tdb_chainlock_nonblock(struct tdb_context *tdb, TDB_DATA key);
-int tdb_chainunlock(struct tdb_context *tdb, TDB_DATA key);
-int tdb_chainlock_read(struct tdb_context *tdb, TDB_DATA key);
-int tdb_chainlock_read_nonblock(struct tdb_context *tdb, TDB_DATA key);
-int tdb_chainunlock_read(struct tdb_context *tdb, TDB_DATA key);
-int tdb_chainlock_mark(struct tdb_context *tdb, TDB_DATA key);
-int tdb_chainlock_unmark(struct tdb_context *tdb, TDB_DATA key);
+_PUBLIC_ int tdb_chainlock(struct tdb_context *tdb, TDB_DATA key);
+_PUBLIC_ int tdb_chainlock_nonblock(struct tdb_context *tdb, TDB_DATA key);
+_PUBLIC_ int tdb_chainunlock(struct tdb_context *tdb, TDB_DATA key);
+_PUBLIC_ int tdb_chainlock_read(struct tdb_context *tdb, TDB_DATA key);
+_PUBLIC_ int tdb_chainlock_read_nonblock(struct tdb_context *tdb, TDB_DATA key);
+_PUBLIC_ int tdb_chainunlock_read(struct tdb_context *tdb, TDB_DATA key);
+_PUBLIC_ int tdb_chainlock_mark(struct tdb_context *tdb, TDB_DATA key);
+_PUBLIC_ int tdb_chainlock_unmark(struct tdb_context *tdb, TDB_DATA key);
 
-void tdb_setalarm_sigptr(struct tdb_context *tdb, volatile sig_atomic_t *sigptr);
+_PUBLIC_ void tdb_setalarm_sigptr(struct tdb_context *tdb, volatile sig_atomic_t *sigptr);
 
 /* wipe and repack */
-int tdb_wipe_all(struct tdb_context *tdb);
-int tdb_repack(struct tdb_context *tdb);
+_PUBLIC_ int tdb_wipe_all(struct tdb_context *tdb);
+_PUBLIC_ int tdb_repack(struct tdb_context *tdb);
 
 /* Debug functions. Not used in production. */
-void tdb_dump_all(struct tdb_context *tdb);
-int tdb_printfreelist(struct tdb_context *tdb);
-int tdb_validate_freelist(struct tdb_context *tdb, int *pnum_entries);
-int tdb_freelist_size(struct tdb_context *tdb);
-char *tdb_summary(struct tdb_context *tdb);
+_PUBLIC_ void tdb_dump_all(struct tdb_context *tdb);
+_PUBLIC_ int tdb_printfreelist(struct tdb_context *tdb);
+_PUBLIC_ int tdb_validate_freelist(struct tdb_context *tdb, int *pnum_entries);
+_PUBLIC_ int tdb_freelist_size(struct tdb_context *tdb);
+_PUBLIC_ char *tdb_summary(struct tdb_context *tdb);
 
-extern TDB_DATA tdb_null;
+_PUBLIC_ extern TDB_DATA tdb_null;
 
 #ifdef  __cplusplus
 }
