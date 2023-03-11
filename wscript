@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 APPNAME = 'tdb'
-VERSION = '1.4.3'
+VERSION = '1.4.5'
 
 import sys, os
 
